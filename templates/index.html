@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}DFDS IT Support Bot{% endblock %}
+
+{% block body %}
+<main class="page-shell">
+  <section class="chat-card" aria-label="IT Support Chat">
+    <header class="chat-header">
+      <div class="header-content">
+        <div>
+          <h1>IT Support Bot</h1>
+          <p class="support-note">Responses may take up to a minute while we check internal knowledge and existing tickets.</p>
+        </div>
+        <button id="new-chat-btn" class="new-chat-btn" title="Start a new conversation">New Chat</button>
+      </div>
+    </header>
+
+    <div class="chat-hero" aria-hidden="true">
+      <img class="brain-image" src="{{ url_for('static', filename='images/brain.png') }}" alt="" />
+    </div>
+
+    <section id="chat-log" class="chat-log" aria-live="polite" aria-label="Conversation"></section>
+
+    <form id="chat-form" class="chat-form" novalidate>
+      <label for="message" class="sr-only">Message</label>
+      <textarea id="message" name="message" maxlength="{{ max_length }}" rows="2" placeholder="Type your IT request here..."></textarea>
+      <div class="form-actions">
+        <small id="counter">0 / {{ max_length }}</small>
+        <button id="send-btn" type="submit">Send</button>
+      </div>
+    </form>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.APP_CONFIG = {
+    maxLength: {{ max_length }}
+  };
+</script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}
