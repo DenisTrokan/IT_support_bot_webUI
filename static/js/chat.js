@@ -4,6 +4,8 @@ const messageInput = document.getElementById("message");
 const sendButton = document.getElementById("send-btn");
 const counter = document.getElementById("counter");
 const newChatBtn = document.getElementById("new-chat-btn");
+const emptyState = document.getElementById("empty-state");
+const quickActionButtons = document.querySelectorAll(".quick-action-btn");
 const maxLength = Number(window.APP_CONFIG?.maxLength || 500);
 const sessionStorageKey = "dfds-it-support-session-id";
 const thinkingPhrases = [
@@ -24,8 +26,12 @@ function startNewChat() {
 	window.localStorage.removeItem(oldChatHistoryKey);
 
 	chatLog.innerHTML = "";
+	if (emptyState) {
+		chatLog.appendChild(emptyState);
+	}
 	messageInput.value = "";
 	updateCounter();
+	autoResizeMessageInput();
 	
 	const newSessionId = window.crypto?.randomUUID
 		? window.crypto.randomUUID()
@@ -97,6 +103,7 @@ function appendMessage(text, kind, options = {}) {
 	node.textContent = text;
 	chatLog.appendChild(node);
 	chatLog.scrollTop = chatLog.scrollHeight;
+	refreshEmptyState();
 	
 	if (persist) {
 		saveChatMessage(text, kind);
@@ -109,9 +116,31 @@ function updateCounter() {
 	counter.textContent = `${messageInput.value.length} / ${maxLength}`;
 }
 
+function autoResizeMessageInput() {
+	messageInput.style.height = "auto";
+	messageInput.style.height = `${Math.min(messageInput.scrollHeight, 180)}px`;
+}
+
+function refreshEmptyState() {
+	if (!emptyState) {
+		return;
+	}
+
+	const hasMessages = chatLog.querySelector(".msg") !== null;
+	emptyState.classList.toggle("is-hidden", hasMessages);
+}
+
+function setDraftMessage(text) {
+	messageInput.value = text;
+	updateCounter();
+	autoResizeMessageInput();
+	messageInput.focus();
+}
+
 function setBusy(isBusy) {
 	sendButton.disabled = isBusy;
 	messageInput.disabled = isBusy;
+	sendButton.textContent = isBusy ? "Sending..." : "Send message";
 }
 
 function startThinkingMessage() {
@@ -152,6 +181,7 @@ chatForm.addEventListener("submit", async (event) => {
 	appendMessage(chatInput, "user");
 	messageInput.value = "";
 	updateCounter();
+	autoResizeMessageInput();
 
 	const thinking = startThinkingMessage();
 	setBusy(true);
@@ -189,7 +219,10 @@ chatForm.addEventListener("submit", async (event) => {
 	}
 });
 
-messageInput.addEventListener("input", updateCounter);
+messageInput.addEventListener("input", () => {
+	updateCounter();
+	autoResizeMessageInput();
+});
 
 messageInput.addEventListener("keydown", (event) => {
 	if (event.key === "Enter" && !event.shiftKey) {
@@ -203,9 +236,20 @@ newChatBtn.addEventListener("click", (event) => {
 	startNewChat();
 });
 
+for (const button of quickActionButtons) {
+	button.addEventListener("click", () => {
+		const prompt = button.dataset.prompt;
+		if (prompt) {
+			setDraftMessage(prompt);
+		}
+	});
+}
+
 // Load previous chat history and ensure greeting is added if none exists
 loadChatHistory();
 if (chatLog.children.length === 0) {
 	appendMessage("Hello! I'm ready to help with IT requests.", "bot");
 }
 updateCounter();
+autoResizeMessageInput();
+refreshEmptyState();

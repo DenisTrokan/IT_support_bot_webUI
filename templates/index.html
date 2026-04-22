@@ -6,12 +6,24 @@
 <main class="page-shell">
   <section class="chat-card" aria-label="IT Support Chat">
     <header class="chat-header">
-      <div class="header-content">
-        <div>
-          <h1>IT Support Bot</h1>
-          <p class="support-note">Responses may take up to a minute while we check internal knowledge and existing tickets.</p>
-        </div>
+      <div class="header-top-row">
+        <p class="status-pill" aria-live="polite">
+          <span class="status-dot" aria-hidden="true"></span>
+          Online - Connected to support workflow
+        </p>
         <button id="new-chat-btn" class="new-chat-btn" title="Start a new conversation">New Chat</button>
+      </div>
+      <div class="header-content">
+        <div class="title-block">
+          <p class="eyebrow">DFDS Internal Assistant</p>
+          <h1>IT Support Copilot</h1>
+          <p class="support-note">Ask for troubleshooting, ticket triage, account issues, software setup, or known workarounds. Replies can take up to a minute while the assistant checks knowledge and related tickets.</p>
+        </div>
+      </div>
+      <div class="quick-actions" aria-label="Suggested prompts">
+        <button type="button" class="quick-action-btn" data-prompt="My Outlook is not syncing emails. Can you help me troubleshoot?">Outlook sync issue</button>
+        <button type="button" class="quick-action-btn" data-prompt="I cannot access VPN from home. What checks should I do first?">VPN access checks</button>
+        <button type="button" class="quick-action-btn" data-prompt="I need to install approved software on my laptop. What is the process?">Software request process</button>
       </div>
     </header>
 
@@ -19,14 +31,24 @@
       <img class="brain-image" src="{{ url_for('static', filename='images/brain.png') }}" alt="" />
     </div>
 
-    <section id="chat-log" class="chat-log" aria-live="polite" aria-label="Conversation"></section>
+    <section id="chat-log" class="chat-log" aria-live="polite" aria-label="Conversation">
+      <div id="empty-state" class="empty-state">
+        <h2>Start with a clear IT request</h2>
+        <p>Include context like device type, exact error message, and what you already tried. Better details lead to faster, more actionable replies.</p>
+      </div>
+    </section>
 
     <form id="chat-form" class="chat-form" novalidate>
       <label for="message" class="sr-only">Message</label>
-      <textarea id="message" name="message" maxlength="{{ max_length }}" rows="2" placeholder="Type your IT request here..."></textarea>
+      <div class="textarea-wrap">
+        <textarea id="message" name="message" maxlength="{{ max_length }}" rows="2" placeholder="Describe your IT issue with as much detail as possible..."></textarea>
+      </div>
       <div class="form-actions">
-        <small id="counter">0 / {{ max_length }}</small>
-        <button id="send-btn" type="submit">Send</button>
+        <div class="meta-hints">
+          <small id="counter">0 / {{ max_length }}</small>
+          <small>Enter to send, Shift+Enter for a new line</small>
+        </div>
+        <button id="send-btn" type="submit">Send message</button>
       </div>
     </form>
   </section>
