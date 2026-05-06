@@ -2,7 +2,7 @@
 
 This project is a lightweight Flask web interface for an internal IT support chatbot.
 
-The UI sends user messages to an n8n webhook and displays the returned answer in a chat layout.
+The UI uses Microsoft Entra ID for sign-in, then sends user messages to an n8n webhook and displays the returned answer in a chat layout.
 
 ## What it does
 
@@ -15,6 +15,7 @@ The UI sends user messages to an n8n webhook and displays the returned answer in
 
 - Python 3.10+
 - Flask
+- Authlib
 - Requests
 - python-dotenv
 
@@ -53,7 +54,15 @@ Set these values in your local `.env` file:
 ```env
 FLASK_DEBUG=0
 SECRET_KEY=replace-with-local-secret
+AZURE_TENANT_ID=your-tenant-id
+AZURE_CLIENT_ID=your-app-client-id
+AZURE_CLIENT_SECRET=your-app-client-secret
+AZURE_REDIRECT_URI=https://your-app-domain/auth/callback
+AZURE_POST_LOGOUT_REDIRECT_URI=https://your-app-domain/
+AZURE_SCOPES=openid profile email
 N8N_WEBHOOK_URL=https://your-n8n-host/webhook/your-path
+N8N_INTERNAL_SECRET=replace-with-a-shared-secret
+N8N_INTERNAL_SECRET_HEADER=X-Webhook-Secret
 N8N_TIMEOUT_SECONDS=120
 MAX_MESSAGE_LENGTH=500
 ```
@@ -65,14 +74,31 @@ The app sends this JSON body to n8n:
 ```json
 {
   "chatInput": "User message",
-  "sessionId": "browser-session-id"
+  "sessionId": "browser-session-id",
+  "requestId": "backend-generated-request-id",
+  "user": {
+    "name": "Signed-in user",
+    "email": "user@company.com",
+    "oid": "azure-object-id",
+    "tenantId": "azure-tenant-id",
+    "preferredUsername": "user@company.com",
+    "roles": [],
+    "groups": []
+  },
+  "userName": "Signed-in user",
+  "userEmail": "user@company.com",
+  "userOid": "azure-object-id",
+  "tenantId": "azure-tenant-id",
+  "userRoles": [],
+  "userGroups": []
 }
 ```
 
 ## Notes
 
 - Do not commit `.env` files.
-- Keep webhook URLs and secrets local.
+- Keep Azure credentials, webhook URLs, and shared secrets local.
+- Protect the n8n webhook with a shared secret or private network path.
 - If n8n takes longer than the configured timeout, the UI will show a timeout message.
 
 ## License

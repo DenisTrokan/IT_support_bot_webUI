@@ -7,11 +7,19 @@
   <section class="chat-card" aria-label="IT Support Chat">
     <header class="chat-header">
       <div class="header-top-row">
-        <p class="status-pill" aria-live="polite">
-          <span class="status-dot" aria-hidden="true"></span>
-          Online - Connected to support workflow
-        </p>
-        <button id="new-chat-btn" class="new-chat-btn" title="Start a new conversation">New Chat</button>
+        <div class="header-status-block">
+          <p class="status-pill" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span>
+            Online - Connected to support workflow
+          </p>
+          {% if user %}
+          <p class="user-meta">Signed in as {{ user.name }}{% if user.email %} · {{ user.email }}{% endif %}</p>
+          {% endif %}
+        </div>
+        <div class="header-actions">
+          <a class="new-chat-btn" href="{{ url_for('logout') }}" title="Sign out of Microsoft">Logout</a>
+          <button id="new-chat-btn" class="new-chat-btn" title="Start a new conversation">New Chat</button>
+        </div>
       </div>
       <div class="header-content">
         <div class="title-block">

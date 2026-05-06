@@ -79,6 +79,26 @@ body::before {
   margin-bottom: 0.9rem;
 }
 
+.header-status-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.user-meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(220, 237, 255, 0.82);
+}
+
 .status-pill {
   margin: 0;
   display: inline-flex;
@@ -141,6 +161,10 @@ body::before {
   color: #f5f9ff;
   background: rgba(0, 0, 0, 0.22);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
 }
 

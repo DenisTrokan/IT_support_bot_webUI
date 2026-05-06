@@ -192,15 +192,21 @@ chatForm.addEventListener("submit", async (event) => {
 			headers: {
 				"Content-Type": "application/json"
 			},
+			credentials: "same-origin",
 			body: JSON.stringify({
 				chatInput,
 				sessionId: getSessionId()
 			})
 		});
 
-		const payload = await response.json();
+		const payload = await response.json().catch(() => ({}));
 		thinking.stop();
 		thinking.node.remove();
+
+		if (response.status === 401) {
+			window.location.assign(payload.loginUrl || "/login");
+			return;
+		}
 
 		if (!response.ok) {
 			appendMessage(payload.error || "An error occurred while processing your request.", "system");
