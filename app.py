@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 from functools import wraps
@@ -106,6 +107,36 @@ def _build_n8n_headers(app: Flask) -> dict[str, str]:
 	return {header_name: secret}
 
 
+def _build_n8n_payload(current_user: dict[str, Any], chat_input: str, session_id: str) -> dict[str, Any]:
+	return {
+		"chatInput": chat_input,
+		"sessionId": session_id,
+		"requestId": str(uuid4()),
+		"user": current_user,
+		"userName": current_user.get("name"),
+		"userEmail": current_user.get("email"),
+		"userOid": current_user.get("oid"),
+		"tenantId": current_user.get("tenantId"),
+		"userRoles": current_user.get("roles", []),
+		"userGroups": current_user.get("groups", []),
+	}
+
+
+def _decode_n8n_response(response: requests.Response) -> Any:
+	content_type = response.headers.get("Content-Type", "").lower()
+	if "application/json" in content_type:
+		return response.json()
+
+	body = response.text.strip()
+	if body.startswith(("{", "[")):
+		try:
+			return json.loads(body)
+		except ValueError:
+			pass
+
+	return body
+
+
 def create_app() -> Flask:
 	app = Flask(__name__)
 	app.config.from_object(Config)
@@ -206,20 +237,10 @@ def create_app() -> Flask:
 		if not webhook_url:
 			return jsonify({"error": "n8n webhook is not configured on the server."}), 500
 
-		n8n_payload = {
-			"chatInput": chat_input,
-			"sessionId": session_id,
-			"requestId": str(uuid4()),
-			"user": current_user,
-			"userName": current_user.get("name"),
-			"userEmail": current_user.get("email"),
-			"userOid": current_user.get("oid"),
-			"tenantId": current_user.get("tenantId"),
-			"userRoles": current_user.get("roles", []),
-			"userGroups": current_user.get("groups", []),
-		}
+		n8n_payload = _build_n8n_payload(current_user, chat_input, session_id)
 
 		try:
+			app.logger.info("Forwarding chat request to n8n webhook")
 			response = requests.post(
 				webhook_url,
 				json=n8n_payload,
@@ -228,11 +249,7 @@ def create_app() -> Flask:
 			)
 			response.raise_for_status()
 
-			response_payload: Any
-			if "application/json" in response.headers.get("Content-Type", ""):
-				response_payload = response.json()
-			else:
-				response_payload = response.text
+			response_payload = _decode_n8n_response(response)
 
 			reply = _extract_reply(response_payload) or "Risposta ricevuta, ma senza testo leggibile."
 			if reply == "Risposta ricevuta, ma senza testo leggibile.":

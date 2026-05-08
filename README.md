@@ -2,12 +2,14 @@
 
 This project is a lightweight Flask web interface for an internal IT support chatbot.
 
-The UI uses Microsoft Entra ID for sign-in, then sends user messages to an n8n webhook and displays the returned answer in a chat layout.
+The UI uses Microsoft Entra ID for sign-in, then sends user messages to the new n8n webhook through Flask and displays the returned answer in a chat layout.
 
 ## What it does
 
 - Provides a simple chat interface for IT support requests
 - Sends requests to n8n using `chatInput` and `sessionId`
+- Uses Flask as the only browser-facing chat entry point (`/api/chat`)
+- Forwards verified Microsoft claims and a shared secret header to the n8n webhook
 - Shows bot responses in the same conversation
 - Keeps local chat history per browser session
 
@@ -69,7 +71,7 @@ MAX_MESSAGE_LENGTH=500
 
 ## Webhook payload
 
-The app sends this JSON body to n8n:
+The app sends this JSON body to the n8n chat webhook:
 
 ```json
 {
@@ -93,6 +95,8 @@ The app sends this JSON body to n8n:
   "userGroups": []
 }
 ```
+
+The webhook response can be plain text or JSON. When JSON is used, Flask will try to extract a readable reply from common fields such as `reply`, `message`, `text`, `output`, `response`, or `answer`.
 
 ## Notes
 
