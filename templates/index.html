@@ -25,18 +25,31 @@
         <div class="title-block">
           <p class="eyebrow">DFDS Internal Assistant</p>
           <h1>IT Support Copilot</h1>
-          <p class="support-note">Ask for troubleshooting, ticket triage, account issues, software setup, or known workarounds. Replies can take up to a minute while the assistant checks knowledge and related tickets.</p>
         </div>
+        <button
+          id="header-toggle-btn"
+          class="header-toggle-btn"
+          type="button"
+          aria-expanded="true"
+          aria-controls="header-details"
+          title="Show or hide assistant details"
+        >
+          <span id="header-toggle-label">Hide details</span>
+          <span class="toggle-chevron" aria-hidden="true"></span>
+        </button>
       </div>
-      <div class="quick-actions" aria-label="Suggested prompts">
-        <button type="button" class="quick-action-btn" data-prompt="My Outlook is not syncing emails. Can you help me troubleshoot?">Outlook sync issue</button>
-        <button type="button" class="quick-action-btn" data-prompt="I cannot access VPN from home. What checks should I do first?">VPN access checks</button>
-        <button type="button" class="quick-action-btn" data-prompt="I need to install approved software on my laptop. What is the process?">Software request process</button>
+      <div id="header-details" class="header-details">
+        <p class="support-note">Ask for troubleshooting, ticket triage, account issues, software setup, or known workarounds. Replies can take up to a minute while the assistant checks knowledge and related tickets.</p>
+        <div class="quick-actions" aria-label="Suggested prompts">
+          <button type="button" class="quick-action-btn" data-prompt="My Outlook is not syncing emails. Can you help me troubleshoot?">Outlook sync issue</button>
+          <button type="button" class="quick-action-btn" data-prompt="I cannot access VPN from home. What checks should I do first?">VPN access checks</button>
+          <button type="button" class="quick-action-btn" data-prompt="I need to install approved software on my laptop. What is the process?">Software request process</button>
+        </div>
       </div>
     </header>
 
     <div class="chat-hero" aria-hidden="true">
-      <img class="brain-image" src="{{ url_for('static', filename='images/brain.png') }}" alt="" />
+      <img class="brain-image" src="{{ url_for('static', filename='images/Brain_with_logo_clean.png') }}" alt="" />
     </div>
 
     <section id="chat-log" class="chat-log" aria-live="polite" aria-label="Conversation">

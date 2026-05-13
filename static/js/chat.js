@@ -6,8 +6,13 @@ const counter = document.getElementById("counter");
 const newChatBtn = document.getElementById("new-chat-btn");
 const emptyState = document.getElementById("empty-state");
 const quickActionButtons = document.querySelectorAll(".quick-action-btn");
+const chatHeader = document.querySelector(".chat-header");
+const headerToggleBtn = document.getElementById("header-toggle-btn");
+const headerToggleLabel = document.getElementById("header-toggle-label");
 const maxLength = Number(window.APP_CONFIG?.maxLength || 500);
 const sessionStorageKey = "dfds-it-support-session-id";
+const headerExpandedStorageKey = "dfds-it-support-header-expanded";
+const headerDesktopMinWidth = 1001;
 const thinkingPhrases = [
 	"Thinking",
 	"Reviewing internal knowledge",
@@ -164,6 +169,65 @@ function startThinkingMessage() {
 	};
 }
 
+function isDesktopViewport() {
+	return window.matchMedia(`(min-width: ${headerDesktopMinWidth}px)`).matches;
+}
+
+function readStoredHeaderState() {
+	try {
+		const storedState = window.localStorage.getItem(headerExpandedStorageKey);
+		if (storedState === "true") {
+			return true;
+		}
+
+		if (storedState === "false") {
+			return false;
+		}
+	} catch {
+		return null;
+	}
+
+	return null;
+}
+
+function setHeaderExpanded(isExpanded, options = {}) {
+	const { persist = true } = options;
+
+	if (!chatHeader || !headerToggleBtn || !headerToggleLabel) {
+		return;
+	}
+
+	chatHeader.classList.toggle("is-collapsed", !isExpanded);
+	headerToggleBtn.setAttribute("aria-expanded", String(isExpanded));
+	headerToggleLabel.textContent = isExpanded ? "Hide details" : "Show details";
+
+	if (persist) {
+		try {
+			window.localStorage.setItem(headerExpandedStorageKey, String(isExpanded));
+		} catch {
+			// Ignore storage errors and keep UI responsive.
+		}
+	}
+}
+
+function initializeHeaderState() {
+	if (!chatHeader || !headerToggleBtn || !headerToggleLabel) {
+		return;
+	}
+
+	const storedState = readStoredHeaderState();
+	const defaultState = isDesktopViewport();
+	setHeaderExpanded(storedState ?? defaultState, { persist: false });
+}
+
+function handleHeaderViewportChange() {
+	if (readStoredHeaderState() !== null) {
+		return;
+	}
+
+	setHeaderExpanded(isDesktopViewport(), { persist: false });
+}
+
 chatForm.addEventListener("submit", async (event) => {
 	event.preventDefault();
 	const chatInput = messageInput.value.trim();
@@ -251,8 +315,18 @@ for (const button of quickActionButtons) {
 	});
 }
 
+if (headerToggleBtn) {
+	headerToggleBtn.addEventListener("click", () => {
+		const isExpanded = headerToggleBtn.getAttribute("aria-expanded") === "true";
+		setHeaderExpanded(!isExpanded);
+	});
+}
+
+window.addEventListener("resize", handleHeaderViewportChange);
+
 // Load previous chat history and ensure greeting is added if none exists
 loadChatHistory();
+initializeHeaderState();
 if (chatLog.children.length === 0) {
 	appendMessage("Hello! I'm ready to help with IT requests.", "bot");
 }
